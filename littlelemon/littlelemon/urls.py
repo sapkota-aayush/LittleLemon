@@ -1,22 +1,20 @@
-"""
-URL configuration for littlelemon project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from restaurant.views import CategoryViewSet, MenuItemViewSet, CartViewSet, OrderViewSet
+from restaurant.views import manager_view  # Import the new view
 
+
+# Create a router & register our ViewSets
+router = DefaultRouter()
+router.register(r'categories', CategoryViewSet)
+router.register(r'menu-items', MenuItemViewSet)
+router.register(r'cart', CartViewSet)
+router.register(r'orders', OrderViewSet)
+
+# Include router URLs
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),  # Ensure this line is included for the admin panel
+    path('', include(router.urls)),  # This includes all API routes from the router
+    path('manager-only/', manager_view),  # New route for manager-only access
 ]
