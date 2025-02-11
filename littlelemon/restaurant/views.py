@@ -3,9 +3,19 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets, status, filters
+from rest_framework.throttling import UserRateThrottle
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, MenuItem, Cart, Order
 from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer
+
+
+# Custom Throttle Classes
+class BurstRateThrottle(UserRateThrottle):
+    scope = 'burst'
+
+
+class SustainedRateThrottle(UserRateThrottle):
+    scope = 'sustained'
 
 
 # Manager-only access
@@ -22,6 +32,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
+    throttle_classes = [BurstRateThrottle, SustainedRateThrottle]  # Apply throttling
 
 
 # ViewSet for menu items (only Managers can modify)
@@ -30,17 +41,20 @@ class MenuItemViewSet(viewsets.ModelViewSet):
     serializer_class = MenuItemSerializer
     permission_classes = [IsAuthenticated]
 
-    # Add pagination and filtering/searching/sorting backends
+    # Add filtering/searching/sorting backends
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-
+    
     # Filtering fields
     filterset_fields = ['category', 'featured', 'price']
-
-    # Searching fields
+    
+    # Searching fields (must match model fields or related fields)
     search_fields = ['title', 'category__title']
-
+    
     # Ordering fields
     ordering_fields = ['price', 'title']
+
+    # Apply throttling classes
+    throttle_classes = [BurstRateThrottle, SustainedRateThrottle]
 
     def create(self, request, *args, **kwargs):
         if not request.user.groups.filter(name="Manager").exists():
@@ -63,6 +77,9 @@ class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
+    
+    # Apply throttling classes
+    throttle_classes = [BurstRateThrottle]
 
     def get_queryset(self):
         # Filter cart items by the logged-in user
@@ -83,6 +100,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
+    
+    # Apply throttling classes
+    throttle_classes = [BurstRateThrottle]
 
     def get_queryset(self):
         user = self.request.user
