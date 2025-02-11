@@ -1,13 +1,13 @@
-from django.contrib.auth.models import Group
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import Group, User
+from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework.response import Response
 from rest_framework import viewsets, status, filters
 from rest_framework.throttling import UserRateThrottle
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, MenuItem, Cart, Order
 from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer
-
+from django.shortcuts import get_object_or_404
 
 # Custom Throttle Classes
 class BurstRateThrottle(UserRateThrottle):
@@ -62,14 +62,19 @@ class MenuItemViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        if not request.user.groups.filter(name="Manager").exists():
+         if not request.user.groups.filter(name="Manager").exists():
             return Response({"error": "Only Managers can update menu items."}, status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
+         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         if not request.user.groups.filter(name="Manager").exists():
             return Response({"error": "Only Managers can delete menu items."}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
+    
+    def partial_update(self, request, *args, **kwargs):
+        if not request.user.groups.filter(name="Manager").exists():
+            return Response({"error": "Only Managers can update menu items."}, status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
 
 
 # ViewSet for Cart (Only Customers can add items)
@@ -124,11 +129,45 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def update(self, request, *args, **kwargs):
-        if not request.user.groups.filter(name="Delivery Crew").exists():
-            return Response({"error": "Only Delivery Crew can update orders."}, status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
+        order = self.get_object()
+
+        # Only Delivery Crew can update the status
+        if request.user.groups.filter(name="Delivery Crew").exists():
+            # Delivery crew can only update the status
+            serializer = self.get_serializer(order, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        # Only Managers can assign a delivery crew
+        elif request.user.groups.filter(name="Manager").exists():
+            # Managers can only assign delivery crew
+             serializer = self.get_serializer(order, data=request.data, partial=True)
+             serializer.is_valid(raise_exception=True)
+             serializer.save()
+             return Response(serializer.data)
+        else:
+            return Response({"error": "You are not authorized to update orders."}, status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, *args, **kwargs):
         if not request.user.groups.filter(name="Manager").exists():
             return Response({"error": "Only Managers can delete orders."}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
+
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User, Group
+from django.shortcuts import get_object_or_404
+
+class UserViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=True, methods=['post'])
+    def assign_to_delivery_crew(self, request, pk=None):
+        if not request.user.groups.filter(name="Manager").exists():
+            return Response({"error": "Only Managers can assign users to delivery crew."}, status=status.HTTP_403_FORBIDDEN)
+        user = get_object_or_404(User, pk=pk)
+        delivery_crew_group = Group.objects.get(name="Delivery Crew")
+        user.groups.add(delivery_crew_group)
+        return Response({"message": f"User {user.username} assigned to Delivery Crew."}, status=status.HTTP_200_OK)
