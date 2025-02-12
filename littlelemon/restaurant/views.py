@@ -8,6 +8,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, MenuItem, Cart, Order
 from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer
 from django.shortcuts import get_object_or_404
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+
+#Project done by Aayush Sapkota
+
 
 # Custom Throttle Classes
 class BurstRateThrottle(UserRateThrottle):
@@ -32,6 +37,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     throttle_classes = [BurstRateThrottle, SustainedRateThrottle]  # Apply throttling
 
 
