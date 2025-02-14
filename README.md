@@ -1,6 +1,6 @@
 # Little Lemon Restaurant API
 
-![Little Lemon Logo](images/little_lemon_logo.png)
+![Little Lemon Logo]([images/little_lemon_logo.png](https://pbs.twimg.com/media/FzyG0vDWIAAPQIf.png:large))
 
 ---
 
