@@ -86,22 +86,22 @@ API calls are **limited to 5 per minute** for authenticated users.
 Here are some tested API samples using **Postman**:
 
 ### 🔹 Django Admin Panel (Models View)
-![Django Admin Panel](images/DjangoPanel.png)
+![Django Admin Panel](Images/DjangoPanel.png)
 
 ### 🔹 Groups in Django Admin Panel
-![Groups](images/groups.png)
+![Groups](Images/groups.png)
 
 ### 🔹 User Registration (Weak Password Error)
-![Weak Password Error](images/auth1.png)
+![Weak Password Error](Images/auth1.png)
 
 ### 🔹 User Registration (Successful)
-![Successful Registration](images/auth2.png)
+![Successful Registration](Images/auth2.png)
 
 ### 🔹 JWT Token Generation
-![JWT Token Generation](images/jwt.png)
+![JWT Token Generation](Images/jwt.png)
 
 ### 🔹 Fetching Categories with Token Authentication
-![Categories List](images/cath.png)
+![Categories List](Images/cath.png)
 
 
 
