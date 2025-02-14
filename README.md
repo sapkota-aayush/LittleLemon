@@ -116,5 +116,5 @@ This project is licensed under the **MIT License** - see the **[LICENSE](LICENSE
 ---
 
 ## 📧 Contact
-For any queries, please contact **your-email@example.com**.
+For any queries, please contact **aayush@aayussh.com**.
 
