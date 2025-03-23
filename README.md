@@ -1,9 +1,5 @@
 # Little Lemon Restaurant API
 
-![Little Lemon Logo](images/little_lemon_logo.png)
-
----
-
 ## 🍽️ Project Description
 This project implements a **REST API** for the **Little Lemon** restaurant using Django and Django REST Framework. The API supports three types of users: **Managers, Customers, and Delivery Crew**. It provides functionality for user management, menu item handling, order processing, and delivery management.
 
@@ -116,5 +112,5 @@ This project is licensed under the **MIT License** - see the **[LICENSE](LICENSE
 ---
 
 ## 📧 Contact
-For any queries, please contact **your-email@example.com**.
+For any queries, please contact **aayush@aayussh.com**.
 
